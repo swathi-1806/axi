@@ -86,6 +86,108 @@ Examples:
 
 ### WRAP Burst (2'b10)
 Address increments until the wrap boundary is reached and then wraps around.
+### WRAP Burst Address Calculation
+
+In a WRAP burst, the address increments like an INCR burst until it reaches the wrap boundary. Once the boundary is reached, the address wraps back to the start of the burst region.
+
+#### Step 1: Calculate Number of Bytes per Transfer
+
+```text
+Number of Bytes = 2^AWSIZE
+```
+
+Example:
+
+```text
+AWSIZE = 2
+Number of Bytes = 4
+```
+
+#### Step 2: Calculate Total Burst Size
+
+```text
+Burst Size = Number of Bytes × (AWLEN + 1)
+```
+
+Example:
+
+```text
+AWLEN = 3
+Burst Size = 4 × (3 + 1)
+           = 16 bytes
+```
+
+#### Step 3: Calculate Wrap Boundary
+
+```text
+Wrap Boundary = INT(Start Address / Burst Size) × Burst Size
+```
+
+Example:
+
+```text
+Start Address = 0x34
+Burst Size    = 16
+
+Wrap Boundary = INT(0x34 / 16) × 16
+              = 0x30
+```
+
+#### Step 4: Calculate Upper Wrap Address
+
+```text
+Upper Boundary = Wrap Boundary + Burst Size
+```
+
+Example:
+
+```text
+Upper Boundary = 0x30 + 0x10
+               = 0x40
+```
+
+#### Step 5: Address Generation
+
+```text
+Next Address = Current Address + Number of Bytes
+
+if (Next Address == Upper Boundary)
+    Next Address = Wrap Boundary;
+```
+
+Example:
+
+```text
+Start Address = 0x34
+AWSIZE        = 2 (4 bytes)
+AWLEN         = 3 (4 beats)
+
+Address Sequence:
+
+0x34
+0x38
+0x3C
+0x30   <-- Wrapped
+```
+
+Another Example:
+
+```text
+Start Address = 0x18
+AWSIZE        = 2
+AWLEN         = 3
+
+Burst Size    = 16 bytes
+Wrap Boundary = 0x10
+Upper Boundary= 0x20
+
+Address Sequence:
+
+0x18
+0x1C
+0x10
+0x14
+```
 
 ---
 
