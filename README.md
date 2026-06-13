@@ -169,26 +169,6 @@ Address Sequence:
 0x3C
 0x30   <-- Wrapped
 ```
-
-Another Example:
-
-```text
-Start Address = 0x18
-AWSIZE        = 2
-AWLEN         = 3
-
-Burst Size    = 16 bytes
-Wrap Boundary = 0x10
-Upper Boundary= 0x20
-
-Address Sequence:
-
-0x18
-0x1C
-0x10
-0x14
-```
-
 ---
 
 ## UVM Verification Components
