@@ -171,6 +171,74 @@ Address Sequence:
 ```
 ---
 
+## Memory Write Handling Based on AWSIZE
+
+The responder stores write data into memory byte-by-byte based on the AXI transfer size (`AWSIZE`).
+
+```systemverilog
+for(int b=0; b<(1<<awsize_t); b++)
+   mem[awaddr_t+b] = vif.wdata[8*b +: 8];//variable[start_bit +: width]
+```
+
+
+
+Where:
+
+* `AWSIZE` defines the number of bytes transferred per beat.
+* Number of bytes per beat = `2^AWSIZE` (`1 << awsize_t`).
+* `mem[awaddr_t+b]` selects the target memory location.
+* `vif.wdata[8*b +: 8]` extracts one byte from the write data bus.
+
+| AWSIZE | Bytes/Beat |
+| ------ | ---------- |
+| 0      | 1 Byte     |
+| 1      | 2 Bytes    |
+| 2      | 4 Bytes    |
+
+```
+for(int b=0; b<(1<<awsize_t); b++)
+mem[awaddr_t+b] = vif.wdata[8*b +: 8]; 
+the loop executes: 
+burst_size = 0 (1 byte) 
+b = 0 
+mem[addr] = wdata[7:0]; 
+
+burst_size = 1 (2 bytes) 
+b = 0 -> mem[addr] = wdata[7:0]; 
+b = 1 -> mem[addr+1] = wdata[15:8]; 
+
+burst_size = 2 (4 bytes)
+b = 0 -> mem[addr] = wdata[7:0]; 
+b = 1 -> mem[addr+1] = wdata[15:8]; 
+b = 2 -> mem[addr+2] = wdata[23:16]; 
+b = 3 -> mem[addr+3] = wdata[31:24];
+```
+Example for `wdata = 32'hAABBCCDD` and `AWSIZE = 2`:
+```systemverilog
+mem[addr]   = 8'hDD;
+mem[addr+1] = 8'hCC;
+mem[addr+2] = 8'hBB;
+mem[addr+3] = 8'hAA;
+```
+```
+Iteration 1 
+b = 0;
+vif.wdata[8*0 +: 8] = vif.wdata[0 +: 8] = vif.wdata[7:0] = 8'hDD
+So: mem[awaddr_t] = 8'hDD;
+
+Iteration 2 b = 1;
+vif.wdata[8*1 +: 8] = vif.wdata[8 +: 8] = vif.wdata[15:8] = 8'hCC
+So: mem[awaddr_t+1] = 8'hCC;
+
+Iteration 3 b = 2; vif.wdata[16 +: 8] = vif.wdata[23:16] = 8'hBB
+So: mem[awaddr_t+2] = 8'hBB;
+
+Iteration 4 b = 3; vif.wdata[24 +: 8] = vif.wdata[31:24] = 8'hAA
+So: mem[awaddr_t+3] = 8'hAA;
+```
+This implementation automatically adapts to different AXI transfer sizes and avoids hardcoding byte assignments.
+
+---
 ## UVM Verification Components
 
 ### Sequence Item (axi_tx)
