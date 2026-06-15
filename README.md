@@ -197,8 +197,11 @@ Where:
 
 ```
 for(int b=0; b<(1<<awsize_t); b++)
-mem[awaddr_t+b] = vif.wdata[8*b +: 8]; 
-the loop executes: 
+mem[awaddr_t+b] = vif.wdata[8*b +: 8];
+```
+```
+the loop executes:
+
 burst_size = 0 (1 byte) 
 b = 0 
 mem[addr] = wdata[7:0]; 
