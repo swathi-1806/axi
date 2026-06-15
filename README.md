@@ -229,14 +229,19 @@ b = 0;
 vif.wdata[8*0 +: 8] = vif.wdata[0 +: 8] = vif.wdata[7:0] = 8'hDD
 So: mem[awaddr_t] = 8'hDD;
 
-Iteration 2 b = 1;
+Iteration 2
+b = 1;
 vif.wdata[8*1 +: 8] = vif.wdata[8 +: 8] = vif.wdata[15:8] = 8'hCC
 So: mem[awaddr_t+1] = 8'hCC;
 
-Iteration 3 b = 2; vif.wdata[16 +: 8] = vif.wdata[23:16] = 8'hBB
+Iteration 3
+b = 2;
+vif.wdata[16 +: 8] = vif.wdata[23:16] = 8'hBB
 So: mem[awaddr_t+2] = 8'hBB;
 
-Iteration 4 b = 3; vif.wdata[24 +: 8] = vif.wdata[31:24] = 8'hAA
+Iteration 4
+b = 3;
+vif.wdata[24 +: 8] = vif.wdata[31:24] = 8'hAA
 So: mem[awaddr_t+3] = 8'hAA;
 ```
 This implementation automatically adapts to different AXI transfer sizes and avoids hardcoding byte assignments.
