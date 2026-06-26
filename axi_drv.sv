@@ -14,17 +14,29 @@ function void build_phase(uvm_phase phase);
 endfunction
 	
 	task run_phase(uvm_phase phase);
+  		vif.awvalid = 0;
+   		vif.wvalid  = 0;
+   		vif.bready  = 0;
+   		vif.arvalid = 0;
+   		vif.rready  = 0;	
 		forever begin
+           $display("%0t Driver waiting",$time);
 			seq_item_port.get_next_item(req);
+            $display("%0t Driver got item",$time);
 			drive_tx(req);
 			$display("----------------------->%0t:",$time);
 			req.print();
+           $display("%0t Driver done",$time);
 			seq_item_port.item_done();
 		end
 	endtask
 
 	task drive_tx(axi_tx tx);
-      wait(vif.arst==1);//TODO
+      $display("Entered drive_tx at %0t", $time);
+       $display("Initial arst = %b", vif.arst);
+      wait(vif.arst==1);
+   
+      $display("Reset released at %0t", $time);
 		vif.wr_rd=tx.wr_rd;
 		if(vif.wr_rd==1)begin
 			write_addr_phase(tx);
@@ -40,7 +52,9 @@ endfunction
 //NO CLOCKING BLOCKS
 
 	task write_addr_phase(axi_tx tx);
+      $display("Before first posedge %0t", $time);
 			@(posedge vif.aclk);
+       $display("After first posedge %0t", $time);
 			vif.awid =tx.id;
 			vif.awaddr =tx.addr;
 			vif.awlen =tx.burst_len;

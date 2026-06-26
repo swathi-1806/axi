@@ -1,4 +1,4 @@
-interface axi_intf(input bit aclk,arst);
+interface axi_intf(input logic aclk,arst);
 bit wr_rd;
 
 //====================================================

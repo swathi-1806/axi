@@ -43,8 +43,16 @@ module tb;
       												"vif",
       												vif);
     end
+  	
   	initial begin
-   			run_test("axi_test");
+   			run_test("axi_1wr_test");
 	end
+
+  	initial begin
+  		$dumpfile("dump.vcd");
+  		$dumpvars(0, tb);
+	end
+
+    
 endmodule
 

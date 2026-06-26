@@ -1,7 +1,7 @@
 class axi_sequence extends uvm_sequence#(axi_tx);
 	`uvm_object_utils(axi_sequence)
 	`NEW_OBJ
-	uvm_phase phase;
+/*	uvm_phase phase;
 	task pre_body();
 		phase=get_starting_phase();
 		if(phase!=null)begin
@@ -13,62 +13,38 @@ class axi_sequence extends uvm_sequence#(axi_tx);
 		if(phase!=null)begin
 			phase.drop_objection(this);
 		end
-	endtask
+	endtask*/
 endclass
 
-class axi_wr_rd_seq extends axi_sequence;
-	`uvm_object_utils(axi_wr_rd_seq)
-	`NEW_OBJ
-  int tx_count;
-	axi_tx tx;
-	task body();
+//==================================================================================
+class axi_1wr_seq extends axi_sequence;
+`uvm_object_utils(axi_1wr_seq)
+`NEW_OBJ
 
-		  if(!uvm_resource_db #(int)::read_by_name("GLOBAL",
-            										"TX_COUNT",
-            										tx_count,
-            										null))
-         tx_count = 10;
+axi_tx tx;
 
-		//write
-		`uvm_do_with(req,{req.wr_rd==1;})
-		tx = axi_tx::type_id::create("tx");
-		tx.copy(req);
-		//read
-		`uvm_do_with(req,{req.wr_rd==0;
-						  req.id==tx.id;
-						  req.addr== tx.addr;
-						  req.burst_len==tx.burst_len;
-						  req.burst_size==tx.burst_size;
-						  req.burst_type==tx.burst_type;})
+task body();
+	tx = axi_tx::type_id::create("tx");
 
-	endtask
-endclass
+	start_item(tx);
+   `uvm_info("SEQ","Sequence Started",UVM_NONE)
+		assert(tx.randomize() with {wr_rd ==1;
+									addr =='h1000;
+									id==0;
+									burst_len==0;//1 beat
+									burst_size ==3'd2; //4bytes/beat
+									burst_type ==INCR;});
+	//Fill one data beat
+	//tx.dataQ.push_back(32'h12345678);
+  	tx.dataQ[0] = 32'h12345678;
 
-class axi_nwr_nrd_seq extends axi_sequence;
-	`uvm_object_utils(axi_nwr_nrd_seq)
-	`NEW_OBJ
-	int tx_count;
-	axi_tx tx,txQ[$];
-	task body();
-		uvm_resource_db#(int)::read_by_name("GLOBAL","TX_COUNT",tx_count,null);
-		//write
-		repeat(tx_count)begin
-			`uvm_do_with(req,{req.wr_rd==1;})
-			tx = axi_tx::type_id::create("tx");
-			tx.copy(req);
-			txQ.push_back(tx);
-		end
-		//read
-		repeat(tx_count)begin
-			tx=txQ.pop_front();
-			`uvm_do_with(req,{req.wr_rd==0;
-						  req.id==tx.id;
-						  req.addr== tx.addr;
-						  req.burst_len==tx.burst_len;
-						  req.burst_size==tx.burst_size;
-						  req.burst_type==tx.burst_type;})
+	//strobe value
+	//tx.strbQ.push_back(4'hF);
+    tx.strbQ[0]=4'hF;
+ `uvm_info("SEQ","Before finish_item",UVM_NONE)
 
-		end
-	endtask
+  finish_item(tx);
+  `uvm_info("SEQ","Sequence Finished",UVM_NONE)
+endtask
 endclass
 	

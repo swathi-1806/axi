@@ -1,4 +1,3 @@
-//===================================================================
 //axi_responder
 //===================================================================
 class axi_responder extends uvm_component;
@@ -149,12 +148,14 @@ task run_phase(uvm_phase phase);
               				burst_type_t'(awburst_t), 
 							aw_wrap_lower_addr,
               				aw_wrap_upper_addr);
+              
 
 			if(vif.wlast==1)begin
 					fork
 					//	write_resp(vif.wid);
 					 write_resp(awid_t);
 					join_none
+            
 			end
 		end
 			else vif.wready<=0;
